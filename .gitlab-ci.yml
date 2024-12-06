@@ -1,7 +1,6 @@
-build:
-  image: docker:20.10.16
+default:
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
-  stage: build
+    - docker info
+build_image:
   script:
     - docker build -t openstack_k8_simple_web_app .
