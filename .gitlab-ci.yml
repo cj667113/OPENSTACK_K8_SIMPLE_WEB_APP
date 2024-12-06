@@ -12,4 +12,13 @@ create-image:
     - echo "Docker registry repo is $CI_REGISTRY_IMAGE"
   timeout: 12h
   script:
-    - docker build -t ${CI_REGISTRY_IMAGE}:$VER .
+       - docker build -t ${CI_REGISTRY_IMAGE}:$VER ${CI_PROJECT_DIR}
+
+upload-to-registry:
+    stage: deploy
+    when: manual
+    tags:
+       - shell
+    script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - docker push ${CI_REGISTRY_IMAGE}:$VER
