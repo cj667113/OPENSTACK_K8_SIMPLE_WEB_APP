@@ -13,7 +13,9 @@ create-image:
   timeout: 12h
   script:
        - docker build -t ${CI_REGISTRY_IMAGE}:$VER ${CI_PROJECT_DIR}/docker
-
+  services:
+    - name: docker:20.10.16-dind
+      alias: docker
 upload-to-registry:
     stage: deploy
     when: manual
