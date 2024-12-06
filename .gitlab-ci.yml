@@ -6,4 +6,5 @@ default:
     - docker info
 build_image:
   script:
+    - unset DOCKER_HOST
     - docker build -t openstack_k8_simple_web_app .
