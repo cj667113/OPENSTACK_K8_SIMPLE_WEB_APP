@@ -2,10 +2,6 @@ build:latest-master:
   stage: build
   tags:
     - shell
-  variables:
-    VER: 1.0-${CI_PIPELINE_ID}
-    ID: ${CI_COMMIT_SHORT_SHA}
-    GIT_SUBMODULE_STRATEGY: recursive
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
@@ -15,5 +11,11 @@ build:latest-master:
     - echo "Docker registry repo is $CI_REGISTRY_IMAGE"
   timeout: 12h
   script:
+    # Create the .docker/config.json for Kaniko to authenticate
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/docker/Dockerfile --destination $CI_REGISTRY_IMAGE:latest
+    
+    # Create a tarball of the project directory excluding 'cache'
+    - tar --exclude='./openstack_k8_simple_web_app/cache' -czf build-context.tar.gz -C $CI_PROJECT_DIR .
+    
+    # Run Kaniko with the tarball as the context
+    - /kaniko/executor --cache=true --context=build-context.tar.gz --dockerfile $CI_PROJECT_DIR/docker/Dockerfile --destination $CI_REGISTRY_IMAGE:latest
