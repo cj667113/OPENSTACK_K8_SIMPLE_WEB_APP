@@ -11,11 +11,6 @@ build:latest-master:
     - echo "Docker registry repo is $CI_REGISTRY_IMAGE"
   timeout: 12h
   script:
-    # Ensure .dockerignore is included in the context
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    
-    # Create the tarball and exclude 'cache' directory while making sure the entire context is included
-    - tar --exclude='./openstack_k8_simple_web_app/cache' -czf build-context.tar.gz -C $CI_PROJECT_DIR .
-    
-    # Run Kaniko with the tarball as the context
-    - /kaniko/executor --cache=true --context=build-context.tar.gz --dockerfile $CI_PROJECT_DIR/docker/Dockerfile --destination $CI_REGISTRY_IMAGE:latest
+    # Run Kaniko with the project directory as the context
+    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/docker/Dockerfile --destination $CI_REGISTRY_IMAGE:latest
