@@ -16,6 +16,7 @@ create-image:
   services:
     - name: docker:20.10.16-dind
       alias: docker
+      privileged: true
 upload-to-registry:
     stage: deploy
     when: manual
