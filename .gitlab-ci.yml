@@ -1,12 +1,19 @@
-build:latest-master:
+create-image:
   stage: build
   tags:
     - shell
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
+  variables:
+    VER: 1.0-${CI_PIPELINE_ID}
+    ID: ${CI_COMMIT_SHORT_SHA}
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - echo "Docker registry url is $CI_REGISTRY"
+    - echo "Docker registry username is $CI_REGISTRY_USER"
+    - echo "Docker registry repo is $CI_REGISTRY_IMAGE"
+  timeout: 12h
+  services:
+    - name: docker:20.10.16-dind
+      alias: docker
   script:
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --cache=true --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest
-  only:
-    - master
+    - docker build -t ${CI_REGISTRY_IMAGE}:$VER ${CI_PROJECT_DIR}/docker
+    - docker push ${CI_REGISTRY_IMAGE}:$VER
