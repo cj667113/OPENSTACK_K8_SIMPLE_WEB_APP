@@ -1,3 +1,22 @@
+build:tags:
+  stage: build
+  tags:
+    - shell
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  before_script:
+    - echo "Docker registry url is $CI_REGISTRY"
+    - echo "Docker registry username is $CI_REGISTRY_USER"
+    - echo "Docker registry repo is $CI_REGISTRY_IMAGE"
+  timeout: 12h
+  script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - rm -rf $CI_PROJECT_DIR/docker/cache
+    - /kaniko/executor --cache=false --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/docker/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  rules:
+    - if: '$CI_COMMIT_TAG'
+
 build:latest-master:
   stage: build
   tags:
